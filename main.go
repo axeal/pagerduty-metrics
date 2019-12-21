@@ -2,19 +2,27 @@ package main
 
 import (
 	"os"
+	"log"
 	"fmt"
-	"github.com/PagerDuty/go-pagerduty"
+	"encoding/json"
+	"github.com/axeal/pagerduty-metrics/pd"
 )
 
 func main() {
-	var opts pagerduty.ListEscalationPoliciesOptions
-	var authtoken = os.Getenv("PAGERDUTY_TOKEN")
-	client := pagerduty.NewClient(authtoken)
-	eps, err := client.ListEscalationPolicies(opts)
+
+	pdToken := os.Getenv("PAGERDUTY_TOKEN")
+	pdClient := pd.NewClient(pdToken)
+	incidents, err := pdClient.ListAllIncidents()
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error listing incidents: %s", err)
 	}
-	for _, p := range eps.EscalationPolicies {
-		fmt.Println(p.Name)
+	for _, incident := range incidents {
+		prettyJSON, err := json.MarshalIndent(incident, "", "    ")
+		if err != nil {
+			log.Fatal("Failed to generate json", err)
+		}
+		fmt.Printf("%s\n", string(prettyJSON))
 	}
+	fmt.Printf("Number of elements in list: %d", len(incidents))
+
 }
