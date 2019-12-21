@@ -1,0 +1,5 @@
+.env
+.vscode/
+.devcontainer/
+.git/
+.gitignore
